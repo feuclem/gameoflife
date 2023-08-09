@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+        td {
+            width: 20px;
+            height: 20px;
+            border: 1px solid black;
+            padding: 0;
+        }
+        .alive {
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+<table id="grid"></table>
+
+<script>
+    const numRows = 20;
+    const numCols = 30;
+    let cellGrid = generateRandomStartOfLife();
+
+    const gridTable = document.getElementById("grid");
+
+    function createGrid() {
+        for (let row = 0; row < numRows; row++) {
+            const newRow = document.createElement("tr");
+            for (let col = 0; col < numCols; col++) {
+                const newCell = document.createElement("td");
+                newRow.appendChild(newCell);
+            }
+            gridTable.appendChild(newRow);
+        }
+    }
+
+    function drawGrid() {
+        for (let row = 0; row < numRows; row++) {
+            for (let col = 0; col < numCols; col++) {
+                const cell = gridTable.rows[row].cells[col];
+                cell.className = cellGrid[row][col] === 1 ? "alive" : "";
+            }
+        }
+    }
+
+    function generateRandomStartOfLife() {
+        return Array.from({ length: numRows }, () =>
+            Array.from({ length: numCols }, () => (Math.random() > 0.5 ? 1 : 0))
+        );
+    }
+
+    function decideCellFate() {
+        cellGrid = cellGrid.map((row, rowIndex) =>
+            row.map((col, colIndex) => {
+                const neighbors = countAliveNeighbors(rowIndex, colIndex);
+                if (col === 1) {
+                    return neighbors === 2 || neighbors === 3 ? 1 : 0;
+                } else {
+                    return neighbors === 3 ? 1 : 0;
+                }
+            })
+        );
+        drawGrid();
+    }
+
+    function countAliveNeighbors(row, col) {
+        let neighborCount = 0;
+
+        for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
+            for (let colOffset = -1; colOffset <= 1; colOffset++) {
+                if (rowOffset === 0 && colOffset === 0) {
+                    continue;
+                }
+
+                const newRow = row + rowOffset;
+                const newCol = col + colOffset;
+
+                if (newRow >= 0 && newRow < numRows && newCol >= 0 && newCol < numCols) {
+                    neighborCount += cellGrid[newRow][newCol];
+                }
+            }
+        }
+
+        return neighborCount;
+    }
+
+    function startGame() {
+        setInterval(decideCellFate, 200);
+    }
+
+    createGrid();
+    drawGrid();
+    startGame();
+</script>
+</body>
+</html>
